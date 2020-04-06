@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>New Title</title>
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+<link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="/main.css" rel="stylesheet">
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script src="js/connectors.js"></script>
+<script src="js/friend_list.js"></script>
+<script src="js/domparser.js"></script>
+<script src="js/class_template.js"></script>
+<script src="js/chatbox.js"></script>
+
+<link rel="stylesheet" href="/webjars/font-awesome/5.13.0/css/fontawesome.min.css">
+<link rel="stylesheet" href="/webjars/font-awesome/5.13.0/css/all.min.css">
+</head>
+<body>
+    
+  <i class="far fa-minus-square"></i> 
+    
+    <button onclick="createChatBox_new()"> kreiraj chat box </button>
+    
+	<div class="container-fluid">
+		<div>
+		<div>
+			<div class="msg-box">
+				<label> ime prijatelja</label> <br />
+				<textarea readonly class="msg-read" ></textarea>
+
+				<br />
+				<textarea class="msg-input" ></textarea>
+			</div>
+			<div>
+				<button class="msg-dugme">prijatelj</button>
+			</div>
+		</div>	
+			<p class="stil">Spring je strava</p>
+			<button onclick="send()">Posalji poruku</button>
+
+			<button class="color-pink" onclick="login()">Loguj se</button>
+
+
+			<button onclick="sendLoginCookie()">Posalji login cookie</button>
+
+			<button onclick="getFriendList()">Lista prijatelja</button>
+
+            <button onclick="test_draw10()"> test draw 10 </button>
+            
+			<div id="friend-list" class="list-group friend-list">
+				
+			</div>
+
+<!--
+			<div id="h-chatboxes" class="chatboxes">
+
+
+			</div>
+-->
+			<button onclick="test()">TEST ME</button>
+
+			<div>
+				<textarea id="w3mission" rows="4" cols="50">
+At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.
+</textarea>
+				<button>Neko dugme</button>
+
+			</div>
+			<button onclick="getFriendList()">GET FRIEND LIST</button>
+			<div id="view1" class="template">
+				<p>Ovo je neki paragraf</p>
+			</div>
+
+			<button onclick="copy()">kopiraj visibility element</button>
+
+			<div id="view2" class="template">
+				<div class="row">
+					<button
+						class="color-pink col-8 col-sm-8 col-md-8 col-lg-8 col-xl-8"
+						onclick="this.aa()">this.bb</button>
+					<button
+						class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4 rounded-circle">
+						this.aaa</button>
+				</div>
+			</div>
+
+			<div class="row">
+				<button class="color-pink w-75 ">Primary</button>
+				<button class="w-25">neki tekst</button>
+			</div>
+
+		</div>
+</body>
+</html>

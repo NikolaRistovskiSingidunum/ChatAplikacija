@@ -1,0 +1,132 @@
+@charset "ISO-8859-1";
+
+
+body
+{
+	overflow-x:scroll;
+}
+.stil
+{
+	background-color: lightgray;
+	shadowWidth: blue;
+	color: green;
+	
+}
+.msg-read
+{
+    background-color: azure;
+    width: 150px;
+    height: 200px;
+    resize: none;
+    overflow-y: scroll;
+}
+.msg-whole-chat-box
+{
+	background-color: lightblue; 
+    border-radius: 25px;
+    
+    
+}
+.msg-label
+{
+	background-color:lightblue;
+    display: block;
+    
+}
+.msg-input
+{
+    background-color: lightblue;
+    width: 150px;
+    height: 60px;
+    resize: none;
+    overflow-y: scroll;
+}
+.msg-dugme
+{
+	background-color: lightcyan;
+    width: 150px;	
+}
+.msg-box
+{
+	display:none;
+    
+    
+}
+.color-pink
+{
+	background-color:deeppink;
+}
+
+.friend-list {
+  overflow-y: scroll;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height:500px;
+  border: 3px solid #73AD21;
+}
+
+.chatboxes {
+  position: fixed;
+  background-color: aqua;
+  overflow-x:scroll;
+  bottom: 0px;
+  left: 0;
+  width: 80% ;
+  height:400px;
+  display: inline-flex;
+  border: 3px solid #73AD21;
+    
+    
+}
+.chatbox
+{
+	
+	width: 50px;
+	height:150px;
+	position:fixed;
+}
+.template
+{	
+    visibility: collapse;
+    
+}
+
+.nw-100
+{
+	width: 99%;
+}
+.nw-75
+{
+	width: 74%;
+}
+.nw-50
+{
+	width: 49%;
+}
+.nw-25
+{
+	width: 24%;
+}
+.nrow
+{
+    float: left;
+    background:red;
+}
+
+.msg-icon-delete
+{
+	float:right;
+	margin-left: 5px;
+	color:blue;
+	cursor: pointer;
+}
+.msg-icon-minimize
+{
+	float:right;
+	margin-left: 5px;	
+	color:blue;
+	visibility: hidden;
+	cursor: pointer;
+}
