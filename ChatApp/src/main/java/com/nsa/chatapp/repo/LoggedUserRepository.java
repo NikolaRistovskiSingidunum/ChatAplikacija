@@ -6,12 +6,12 @@ import java.util.Collection;
 //import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
-import com.nsa.chatapp.model.AdminDetails;
+import com.nsa.chatapp.model.LoggedUser;
 import com.nsa.chatapp.model.AuthUserDetails;
 
 
-public interface AuthUserDetailsRepository extends CrudRepository<AdminDetails, Integer> {
+public interface LoggedUserRepository extends CrudRepository<LoggedUser, Integer> {
 	
-    AdminDetails findByUsername(String username);
+    LoggedUser findByUsername(String username);
 
 }

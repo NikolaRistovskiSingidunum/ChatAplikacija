@@ -16,30 +16,67 @@
 <script src="js/domparser.js"></script>
 <script src="js/class_template.js"></script>
 <script src="js/chatbox.js"></script>
+<script src="js/userdetails.js"></script>
+<script src="js/message.js"></script>
+<script src="js/draganddrop.js"></script>
+<script src="js/onload.js"></script>
 
-<link rel="stylesheet" href="/webjars/font-awesome/5.13.0/css/fontawesome.min.css">
-<link rel="stylesheet" href="/webjars/font-awesome/5.13.0/css/all.min.css">
+<link rel="stylesheet"
+	href="/webjars/font-awesome/5.13.0/css/fontawesome.min.css">
+<link rel="stylesheet"
+	href="/webjars/font-awesome/5.13.0/css/all.min.css">
 </head>
 <body>
-    
-  <i class="far fa-minus-square"></i> 
-    
-    <button onclick="createChatBox_new()"> kreiraj chat box </button>
-    
-	<div class="container-fluid">
-		<div>
-		<div>
-			<div class="msg-box">
-				<label> ime prijatelja</label> <br />
-				<textarea readonly class="msg-read" ></textarea>
 
-				<br />
-				<textarea class="msg-input" ></textarea>
-			</div>
+
+
+	<div id="user-details" class="user-details">Ovde pise moje ime</div>
+
+<!--
+	<button onclick="create_message()">kreiraj novu poruku</button>
+
+
+
+	<i class="far fa-minus-square"></i>
+
+	<button onclick="createChatBox_new()">kreiraj chat box</button>
+
+	<button onclick="whoAmI()">Reci ko sam ja</button>
+
+	<button onclick="getMessage(82)">pogledaj poruku</button>
+-->
+
+	<div class="container-fluid">
+				<div id="friend-list" class="list-group friend-list"></div>
+
+ <embed id="e1" class="pp"> 
+			
+<p>Drag the p element back and forth between the two rectangles:</p>
+
+<div class="droptarget" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <p ondragstart="dragStart(event)" draggable="true" id="dragtarget">Drag me!</p>
+</div>
+
+<div class="droptarget" ondrop="drop(event)" ondragover="allowDrop(event)">Baci fajlove</div>
+
+<p style="clear:both;"><strong>Note:</strong> drag events are not supported in Internet Explorer 8 and earlier versions or Safari 5.1 and earlier versions.</p>
+
+<p id="demo"></p>
+	
+<!--
+		<div>
 			<div>
-				<button class="msg-dugme">prijatelj</button>
+				<div class="msg-box">
+					<label> ime prijatelja</label> <br />
+					<textarea readonly class="msg-read"></textarea>
+
+					<br />
+					<textarea class="msg-input"></textarea>
+				</div>
+				<div>
+					<button class="msg-dugme">prijatelj</button>
+				</div>
 			</div>
-		</div>	
 			<p class="stil">Spring je strava</p>
 			<button onclick="send()">Posalji poruku</button>
 
@@ -50,18 +87,16 @@
 
 			<button onclick="getFriendList()">Lista prijatelja</button>
 
-            <button onclick="test_draw10()"> test draw 10 </button>
-            
-			<div id="friend-list" class="list-group friend-list">
-				
-			</div>
+			<button onclick="test_draw10()">test draw 10</button>
 
-<!--
+			<div id="friend-list" class="list-group friend-list"></div>
+
+			
 			<div id="h-chatboxes" class="chatboxes">
 
 
 			</div>
--->
+
 			<button onclick="test()">TEST ME</button>
 
 			<div>
@@ -93,6 +128,7 @@ At w3schools.com you will learn how to make a website. We offer free tutorials i
 				<button class="color-pink w-75 ">Primary</button>
 				<button class="w-25">neki tekst</button>
 			</div>
+-->
 
 		</div>
 </body>

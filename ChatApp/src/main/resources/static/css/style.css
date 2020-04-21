@@ -15,7 +15,9 @@ body
 .msg-read
 {
     background-color: azure;
-    width: 150px;
+    border-top:0;
+    border-left:10px;
+    width: 200px;
     height: 200px;
     resize: none;
     overflow-y: scroll;
@@ -23,7 +25,8 @@ body
 .msg-whole-chat-box
 {
 	background-color: lightblue; 
-    border-radius: 25px;
+    border-top-left-radius: 25px;
+    
     
     
 }
@@ -35,16 +38,39 @@ body
 }
 .msg-input
 {
+	border-top:0;
+	border-left:0;
+
     background-color: lightblue;
-    width: 150px;
-    height: 60px;
+    width: 200px;
+    height: 30px;
     resize: none;
-    overflow-y: scroll;
+	overflow-y: scroll;
+    font-size:14px;
+    color:black;
+    
 }
+
+.msg-attachment
+{
+    align-content: center;
+    border-top:0;
+	border-left:0;
+    background-color: lightblue;
+    width: 200px;
+    height: 30px;
+    resize: none;
+	overflow-y: scroll;
+    display: flex;
+    flex-wrap: wrap;
+
+}
+
+/*promenimo ime*/
 .msg-dugme
 {
 	background-color: lightcyan;
-    width: 150px;	
+    width: 200px;	
 }
 .msg-box
 {
@@ -117,6 +143,7 @@ body
 
 .msg-icon-delete
 {
+
 	float:right;
 	margin-left: 5px;
 	color:blue;
@@ -129,4 +156,120 @@ body
 	color:blue;
 	visibility: hidden;
 	cursor: pointer;
+}
+.msg-icon-more
+{
+	/*
+	float:right;
+	left:120px;
+	margin-right:20px;
+	cursor:pointer;
+	*/
+	float:right;
+	margin-right:20px;
+	margin-top:2px;
+	cursor:pointer;
+	color:aqua;
+}
+.msg-icon-attach
+{
+	//postion:absolute;
+	float:right;
+	/*left:120px;*/
+	margin-right:20px;
+	color:black;
+	cursor:pointer;
+}
+.msg-div-more
+{
+	background-color: azure;
+	border-bottom:0;
+		
+}
+.friend-selector
+{
+	display: block;
+	width:100%;
+	background:linear-gradient(to right, lightblue 0%, azure 100%);
+    
+}
+.msg-msg
+{
+	background-color:white;
+/*	border-radius: 25px;*/
+	font-size: 15px;
+    margin-bottom: 0px;
+    overflow-wrap: break-word;
+}
+.msg-status
+{
+    
+    background-color:white;
+/*	border-radius: 25px;*/
+    float: right;
+    margin-top: 0px;
+    padding-top: 0px;
+	font-size: 7px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+	
+}
+.msg-name
+{
+    
+    background-color:white;
+	border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+	font-size: 12px;
+	
+}
+.user-details
+{
+  font-size: 25px;	
+  position: fixed;
+  background-color: aqua;
+  top: 0;
+  right: 0;
+  width: 20% ;
+  height: 100px;
+}
+.msg-container
+{
+	clear: both;
+}
+.droptarget {
+  float: left; 
+  width: 100px; 
+  height: 35px;
+  margin: 15px;
+  padding: 10px;
+  border: 1px solid #aaaaaa;
+}
+.dd
+{
+    width: 100px;
+    height: 100px;
+    color:blue;
+    background-color: aqua;
+}
+
+
+.msg-img
+{
+    width: 25px;
+    height: 25px;
+    max-width: 25px;
+    max-height: 25px;
+}
+.msg-file-delete
+{
+	position:relative;
+	top:-10px;
+	left:-12px;
+	color:blue;
+    font-size: 10px;
+    overflow: visible;
+    cursor: pointer;
 }

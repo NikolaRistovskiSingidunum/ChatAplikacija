@@ -30,7 +30,7 @@ import com.nsa.chatapp.websocket.WebSocketSessionInformation;
 
 public class ChatServer extends WebSocketServer {
 
-	protected static final List<WebSocket> konekcije = new ArrayList<>();
+	//protected static final List<WebSocket> konekcije = new ArrayList<>();
 
 	public ChatServer(int port) throws UnknownHostException {
 		super(new InetSocketAddress(port));
@@ -42,9 +42,9 @@ public class ChatServer extends WebSocketServer {
 
 	@Override
 	public void onOpen(WebSocket conn, ClientHandshake handshake) {
-		konekcije.add(conn);
-		conn.send("Welcome to the server!"); // This method sends a message to the new client
-		broadcast("new connection: " + handshake.getResourceDescriptor()); // This method sends a message to all clients
+		//konekcije.add(conn);
+		//conn.send("Welcome to the server!"); // This method sends a message to the new client
+		//broadcast("new connection: " + handshake.getResourceDescriptor()); // This method sends a message to all clients
 																			// connected
 		System.out.println(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " entered the room!");
 
@@ -52,7 +52,8 @@ public class ChatServer extends WebSocketServer {
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-		broadcast(conn + " has left the room!");
+		//broadcast(conn + " has left the room!");
+		//WebSocketSessionInformation.re
 		System.out.println(conn + " has left the room!");
 	}
 
@@ -74,6 +75,30 @@ public class ChatServer extends WebSocketServer {
 
 		//new ObjectMapper().readVa
 		System.out.println(message);
+		try
+		{
+			SocketAuthentification socketAuthentification = new ObjectMapper().readValue(message, SocketAuthentification.class);
+			System.out.println("Uspesno logovanje desirajilazija" + socketAuthentification.getJsessionid() );
+			
+			WebSocketSessionInformation.State state = WebSocketSessionInformation.registerNewSession(socketAuthentification.getJsessionid(), conn);
+			
+			if(state == WebSocketSessionInformation.State.UNSUCCESSFUL)
+			{
+				System.out.println("PLEASE LOGIN");
+				conn.close();
+			}
+			else
+			{
+				System.out.println("Uspesno logovanje");
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Nesuspesno logovanje deserijalizacije");
+			System.out.println(e.getMessage());
+			
+		}
+		
 		
 //		String sessionID = "";
 //		

@@ -2,6 +2,9 @@
 
 const sockethost = "ws://localhost:8887";
 const springservice = "http://localhost:9090/";
+
+//const sockethost = "ws://192.168.1.7:8887";
+//const springservice = "http://192.168.1.7:9090/";
 //socket = new WebSocket('ws://localhost:8887');
 //
 //// Connection opened
@@ -31,22 +34,26 @@ function startWebsocket() {
 
 	  ws.onmessage = function(e){
 	    console.log('websocket message event:', e);
+	    //kada soketom stigne poruku na nje se reaguje
+	    messageRouter(e);
 	  }
 
 	  ws.onclose = function(e){
 	    // connection closed, discard old websocket and create a new one in 5s
 		console.log('socket je zatvoren', e);
 	    ws = null;
-	    setTimeout(startWebsocket, 2000);
+	    setTimeout(startWebsocket, 1000);
 	  }
 	  
 	  ws.onopen = function(){
-		  var cookie = getCookie('JSESSIONID');
-		  ws.send(cookie);
+		  let cookie = getCookie('JSESSIONID');
+		  cookie = { 'jsessionid' : cookie};
+		  console.log(JSON.stringify ( cookie ));
+		  ws.send(JSON.stringify ( cookie ));
 	  }
 	}
 
-startWebsocket();
+
 
 
 function getCookie(NameOfCookie)
@@ -95,3 +102,5 @@ function login()
 function logout()
 {
 }
+
+

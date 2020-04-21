@@ -11,8 +11,11 @@ import org.java_websocket.WebSocket;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nsa.chatapp.model.AuthUserDetails;
 import com.nsa.chatapp.utils.BeanUtil;
+import com.nsa.chatapp.websocket.MessageSocketClient.MessageType;
 
 
 
@@ -47,7 +50,39 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		this.sessionInformation = sessionInformation;
 	}
 
-	public static State registerNewSession(String sessionID, WebSocket websocket)
+	synchronized public static void sendMessage(Integer userID, Integer messageChatID)
+	{
+		removeBadSessions();
+		
+		ArrayList<WebSocketSessionInformation> connections = getWebSocketSessionInformation(userID);
+		
+		for( WebSocketSessionInformation w: connections )
+		{
+			if(w.isSessionOK())
+			{
+				//brzi json
+				MessageSocketClient clientMessage = new MessageSocketClient(MessageType.GET_MESSAGE, messageChatID);
+				try {
+					String jsonClientMessage = new ObjectMapper().writeValueAsString(clientMessage);
+					//System.out.println( "{" + "getMessage"   + ":" + messageChatID + "}" );
+					w.websocket.send(jsonClientMessage);
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	synchronized boolean isSessionOK()
+	{
+		if(websocket == null || websocket.isClosed() || websocket.isClosing() || sessionInformation==null || sessionInformation.isExpired() )
+		return false;
+		return true;
+	}
+	
+	synchronized public static State registerNewSession(String sessionID, WebSocket websocket)
 	{
 		removeBadSessions();
 		
@@ -72,8 +107,11 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		int p =search(sessionID);
 	
 		if(p>=0)
+		{
+			//promeni soket 
+			allConnections.get(p).setWebsocket(websocket);
 			return State.ALLREADY_EXISTS;
-			
+		}	
 		
 		
 		allConnections.add(newSession);
@@ -81,7 +119,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		return State.SUCCESS;
 	}
 
-	private static int search(String sesssinID)
+	synchronized private static int search(String sesssinID)
 	{
 		
 		for(int i =0 ; i< allConnections.size(); i++)
@@ -90,7 +128,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 			
 			return -1;
 	}
-	public static boolean isClientLogedIn(WebSocket websocket)
+	synchronized public static boolean isClientLogedIn(WebSocket websocket)
 	{
 		for(WebSocketSessionInformation w: allConnections)
 		{
@@ -102,8 +140,11 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		
 		return false;
 	}
-	public static ArrayList<WebSocketSessionInformation> getWebSocketSessionInformation(int userID)
+	synchronized  public static ArrayList<WebSocketSessionInformation> getWebSocketSessionInformation(int userID)
 	{
+		
+		removeBadSessions();
+		
 		ArrayList<WebSocketSessionInformation> allSession = new ArrayList<>();
 		
 		for(WebSocketSessionInformation w: allConnections)
@@ -117,7 +158,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		return allSession;
 	}
 	
-	public static ArrayList<WebSocketSessionInformation> getWebSocketSessionInformation(ArrayList<Integer>  usersID)
+	synchronized  public static ArrayList<WebSocketSessionInformation> getWebSocketSessionInformation(ArrayList<Integer>  usersID)
 	{
 		ArrayList<WebSocketSessionInformation> allSession = new ArrayList<>();
 		for(Integer id:usersID)
@@ -125,7 +166,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		
 		return allSession;
 	}	
-	private static RemovalInfo removeBadSessions()
+	synchronized private static RemovalInfo removeBadSessions()
 	{
 		Set<WebSocketSessionInformation> removeList = new HashSet<>(); 
 		RemovalInfo returnValue = RemovalInfo.NO_SESSION_REMOVED;
@@ -152,7 +193,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 			
 		}
 		
-		System.out.println("SESSIONS UPDATE STATUS" + returnValue.toString() );
+		System.out.println("SESSIONS UPDATE STATUS : " + returnValue.toString() );
 		
 		return returnValue;
 	}
@@ -163,7 +204,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 
 
 
-	public void setWebsocket(WebSocket websocket) {
+	synchronized public void setWebsocket(WebSocket websocket) {
 		this.websocket = websocket;
 	}
 
@@ -175,7 +216,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 
 
 
-	public void setSessionID(String sessionID) {
+	synchronized public void setSessionID(String sessionID) {
 		this.sessionID = sessionID;
 	}
 
@@ -187,7 +228,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 
 
 
-	public void setUserDetails(AuthUserDetails userDetails) {
+	synchronized public void setUserDetails(AuthUserDetails userDetails) {
 		this.userDetails = userDetails;
 	}
 
@@ -198,8 +239,14 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		return sessionInformation;
 	}
 
-	public void setSessionInformation(SessionInformation sessionInformation) {
+	synchronized public void setSessionInformation(SessionInformation sessionInformation) {
 		this.sessionInformation = sessionInformation;
+	}
+
+	
+	
+	public static List<WebSocketSessionInformation> getAllconnections() {
+		return allConnections;
 	}
 
 	@Override

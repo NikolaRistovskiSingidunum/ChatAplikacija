@@ -21,7 +21,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.nsa.chatapp.repo.AuthUserDetailsRepository;
+import com.nsa.chatapp.repo.LoggedUserRepository;
 
 
 public class AuthUserDetails implements UserDetails {
@@ -35,18 +35,24 @@ public class AuthUserDetails implements UserDetails {
 	
 	private Integer adminID;
 	
+	private String fullname;
+	
+	
+	
+	
 	public AuthUserDetails(String username) {
 		super();
 		this.username = username;
 	}
 
 	
-	public AuthUserDetails(AdminDetails adminDetails)
+	public AuthUserDetails(LoggedUser adminDetails)
 	{
 		this.username=adminDetails.getUsername();
 		this.password = adminDetails.getPassword();
 		this.role = adminDetails.getRole();
 		this.adminID = adminDetails.getId();
+		this.fullname = adminDetails.getFullname();
 	}
 	
 	public void setUsername(String username) {
@@ -99,6 +105,16 @@ public class AuthUserDetails implements UserDetails {
 
 	public Integer getAdminID() {
 		return adminID;
+	}
+
+
+	public String getFullname() {
+		return fullname;
+	}
+
+
+	public void setFullname(String fullname) {
+		this.fullname = fullname;
 	}
 
 	

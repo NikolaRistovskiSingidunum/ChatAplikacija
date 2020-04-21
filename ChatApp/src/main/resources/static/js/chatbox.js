@@ -9,6 +9,7 @@ class ActiveChatboxes
 		constructor()
         {
             this.active_chatboxes = [];
+            this.width = 200;
         }
         activate(box)
         {
@@ -24,6 +25,7 @@ class ActiveChatboxes
                 }
             this.redraw();
             this.deleteOverflow();
+            maximizeChatBox(box);
         }
         moveBoxToFristPlace(box)
         {
@@ -40,9 +42,19 @@ class ActiveChatboxes
             	{
                 	let box = this.active_chatboxes[i];
                     $(box).css("position","fixed");
-                    $(box).css("right", 200+ i*150 );
+                    $(box).css("right", 200+ i*this.width );
                     $(box).css("bottom",0);
                     $(box).css("visibility","visible");
+                    
+                    
+                    let target = $(box).find(".msg-box");
+                    if(target.css("display")=="none")
+                    	$(box).find(".msg-icon-minimize").css("visibility","hidden");
+                    else
+                    	$(box).find(".msg-icon-minimize").css("visibility","visible");
+                    
+                    
+                	$(box).find(".msg-icon-delete").css("visibility","visible");
                     //$("body").append($(newChatBox));
             	}
         }
@@ -53,6 +65,8 @@ class ActiveChatboxes
             for(let i=6; i<l;i++ )
                 {
                     $(this.active_chatboxes[i]).css("visibility","hidden");
+                	$(this.active_chatboxes[i]).find(".msg-icon-minimize").css("visibility","hidden");
+                	$(this.active_chatboxes[i]).find(".msg-icon-delete").css("visibility","hidden");
                 }
                 
                 
@@ -67,8 +81,11 @@ class ActiveChatboxes
             let index = this.active_chatboxes.indexOf(box);
             if(index != -1)
             	{
-            	$(this.active_chatboxes[index]).css("visibility","hidden");
+            	$(box).css("visibility","hidden");
             	this.active_chatboxes.splice(index, 1);
+            	//vidljivost se ne propagira na dete element
+            	$(box).find(".msg-icon-minimize").css("visibility","hidden");
+            	$(box).find(".msg-icon-delete").css("visibility","hidden");
             	}
             this.redraw();
         }
@@ -76,20 +93,29 @@ class ActiveChatboxes
 
 var activeChatBoxes = new ActiveChatboxes();
 var template_chat_box = '<div class="msg-whole-chat-box" draggable="true">\
-	<i class="fas fa-times msg-icon-delete" onclick="activeChatBoxes.remove(this.parentNode)" ></i>\
-	<i class="far fa-minus-square msg-icon-minimize" onclick="minimizeChatBox(this.parentNode)"></i>\
+	<i class="fas fa-times msg-icon-delete" onclick="activeChatBoxes.remove(this.parentNode)" title="skloni" ></i>\
+	<i class="far fa-minus-square msg-icon-minimize" onclick="minimizeChatBox(this.parentNode)" title="smanji"></i>\
 			<div class="msg-box">\
 				<label class="msg-label"> ime prijatelja</label>\
-				<textarea readonly class="msg-read" ></textarea>\
-				<br />\
-				<textarea class="msg-input" ></textarea>\
+				<div class="msg-div-more">\
+				<i class="fas fa-angle-double-up msg-icon-more" title="prikazi jos porukua"></i><br\>\
+				</div>\
+				<div class="msg-read"></div>\
+				\
+				<div>\
+	<div>\
+	<i class="fas fa-paperclip msg-icon-attach" title="prvuci fajl na kutiju ispod da ga zakacis"></i>\
+	</div>\
+    <div class="msg-attachment" ondrop="drop(event,this)" ondragover="allowDrop(event)"></div>\
+	<div contenteditable="true" class="msg-input"  ondragover="allowDrop(event)" ></div>\
+	</div>\
 			</div>\
 			<div>\
 				<button class="msg-dugme" onclick="toggleVisibility(this, this.parentNode.parentNode)">prijatelj</button>\
 			</div>\
 		</div>';
 var template_bottom_chat_box = '<button> Neki tekst </button>';
-var template_friend_selector = '<button> Ime Prijatelja </button>';
+var template_friend_selector = '<button class="friend-selector"> Ime Prijatelja </button>';
 //map svih prijatelja i 
 var chatboxes = new Map();
 //var active_chatboxes = new Map();
@@ -116,6 +142,8 @@ function onGetFirendList(data)
 		//createChatBox_new(data[i]);
         createFriendSelector(data[i]);
 		}
+	
+	loadLast50forAll();
 //	let lista = document.getElementById("friend-list");
 //	let lista1 = $("#friend-list");
 //	lista.innerHTML="";
@@ -176,7 +204,7 @@ function minimizeChatBox(box)
 	let target = $(box).find(".msg-box");
     target.css("display","none");
     let msgbutton = $(box).find(".msg-dugme"); 
-    msgbutton.text(msgbutton.attr("username"));
+    //msgbutton.text(msgbutton.attr("username"));
     $(box).find(".msg-icon-minimize").css("visibility","hidden");
 }
 function maximizeChatBox(box)
@@ -184,7 +212,7 @@ function maximizeChatBox(box)
 	let target = $(box).find(".msg-box");
     target.css("display","block");
     let msgbutton = $(box).find(".msg-dugme");
-    msgbutton.text("sakrij");
+    //msgbutton.text("sakrij");
     $(box).find(".msg-icon-minimize").css("visibility","visible");
 }
 function toggleVisibility(el, p)
@@ -206,14 +234,14 @@ function toggleVisibility(el, p)
     if(target.css("display")=="none")
     	{
         target.css("display","block");
-        $(el).text("sakrij");
+        //$(el).text("sakrij");
         $(p).find(".msg-icon-minimize").css("visibility","visible");
     	}
     else
     	{
     	
         target.css("display","none");
-        $(el).text($(el).attr("username"));
+        //$(el).text($(el).attr("username"));
         $(p).find(".msg-icon-minimize").css("visibility","hidden");
     	}
 }
@@ -254,9 +282,60 @@ function createChatBox_new_new(user)
     $(newChatBox).find("button").text(user.fullname);
     console.log($(newChatBox).find("label"));
     $(newChatBox).css("visibility","hidden");
+    
+    let attachement =$(newChatBox).find(".msg-attachment").get(0);
+    $(newChatBox).find(".msg-input").on('drop', function() { drop(event,attachement); } );
+    //$("body").append($(newChatBox));
+//    console.log($(newChatBox).find(".msg-input"));
+//    $(newChatBox).find(".msg-input").css("color","blue");
+    
+    $(newChatBox).find(".msg-input").keypress(function(event){
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if(keycode == '13'){
+            //alert($(newChatBox).find(".msg-input").val());
+            listAllAttachment(attachement);
+            let msg = {};
+            msg["text"] = $(newChatBox).find(".msg-input").text().trim();
+            msg["receiverid"] =  user.id;
+            
+            //console.log(msg["text"].trim());
+            if(msg["text"].length > 0)
+            sendMessage(msg);
+        }
+    });
+    
     $("body").append($(newChatBox));
+    
+    onChatBoxCreated(newChatBox);
     return newChatBox;
 }
+function listAllAttachment(attachmentList)
+{
+	attachmentList = $(attachmentList);
+	let children = attachmentList.children();
+    //console.log(children);
+    for( let i=0; i< children.length; i++)
+        console.log(children[i]);
+}
+//function sendMessage(msg)
+//{
+//	
+//	  $.ajax({
+//		    type: "POST",
+//		    url: springservice+"message-proxy",
+//		    data: msg
+//		
+//		});
+//}
+//function getMessage(msgID)
+//{
+//	  $.ajax({
+//		    type: "GET",
+//		    url: springservice+"message/"+msgID,
+//		    success: function (response) { console.log(response); }
+//		
+//		});
+//}
 var chatBoxToggler = [];
 
 
@@ -283,4 +362,26 @@ function createChatBox(el)
     newChatBox.style.left= left;
     newChatBox.style.top = top - 150; 
 	document.body.appendChild(newChatBox);
+}
+var createdChatBoxes = [];
+function onChatBoxCreated(box)
+{
+	createdChatBoxes.push(box);
+}
+function getChatBoxByUserID(userID)
+{
+	for(let i=0; i<createdChatBoxes.length; i++)
+		if(createdChatBoxes[i].user.id == userID)
+			return createdChatBoxes[i];
+}
+function getFullNameFromID(userID)
+{
+	for(let i=0; i<createdChatBoxes.length; i++)
+		if(createdChatBoxes[i].user.id == userID)
+			return createdChatBoxes[i].user.fullname;
+}
+function getFirstNameFromID(userID)
+{
+	let fullname = getFullNameFromID(userID);
+	return fullname.split(" ")[0];
 }

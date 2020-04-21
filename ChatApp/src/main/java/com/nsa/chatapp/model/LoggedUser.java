@@ -12,9 +12,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+//Ruzno da se klasa zove AminDetails jer se odnosi na UserDetails, ali je problem sto vec postoji kl
 
 @Entity
-public class AdminDetails {
+public class LoggedUser {
 
 
 	
@@ -35,16 +36,16 @@ public class AdminDetails {
 	@Column(nullable=false,insertable=true, updatable=true)
 	private String password;
 	
-	@Column(nullable=false, length=12)
+	@Column(nullable=false, length=20)
 	private String role;
 	
-	@Column(nullable=false, length=20)
+	@Column(nullable=false, length=64)
 	private String fullname;
 	
 	
 
 
-	protected AdminDetails() {}
+	protected LoggedUser() {}
 
 	
 	public String getFullname() {
@@ -99,7 +100,7 @@ public class AdminDetails {
 	}
 
 
-	public AdminDetails(String username, String password, String role, String fullName) {
+	public LoggedUser(String username, String password, String role, String fullName) {
 		super();
 		
 		this.username = username;
@@ -109,7 +110,7 @@ public class AdminDetails {
 	};
 	
 	
-	public AdminDetails encode()
+	public LoggedUser encode()
 	{
 		this.password = encoder().encode(this.password);
 		return this;
