@@ -50,9 +50,9 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		this.sessionInformation = sessionInformation;
 	}
 
-	synchronized public static void sendMessage(Integer userID, Integer messageChatID)
+	synchronized public static void sendMessage(Integer userID, Integer messageChatID, MessageType messageType)
 	{
-		removeBadSessions();
+		//removeBadSessions();
 		
 		ArrayList<WebSocketSessionInformation> connections = getWebSocketSessionInformation(userID);
 		
@@ -61,7 +61,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 			if(w.isSessionOK())
 			{
 				//brzi json
-				MessageSocketClient clientMessage = new MessageSocketClient(MessageType.GET_MESSAGE, messageChatID);
+				MessageSocketClient clientMessage = new MessageSocketClient(messageType, messageChatID);
 				try {
 					String jsonClientMessage = new ObjectMapper().writeValueAsString(clientMessage);
 					//System.out.println( "{" + "getMessage"   + ":" + messageChatID + "}" );
@@ -84,7 +84,7 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 	
 	synchronized public static State registerNewSession(String sessionID, WebSocket websocket)
 	{
-		removeBadSessions();
+		//removeBadSessions();
 		
 		
 		SessionRegistry sessionRegistry = BeanUtil.getBean(SessionRegistry.class);
@@ -165,7 +165,10 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 			allSession.addAll(getWebSocketSessionInformation(usersID));
 		
 		return allSession;
-	}	
+	}
+	
+	//ne koristimo vise ovaj jer je sada implementiran tacan metod u klasi SecuriyJavaConfig u on login hendleru 
+	@Deprecated
 	synchronized private static RemovalInfo removeBadSessions()
 	{
 		Set<WebSocketSessionInformation> removeList = new HashSet<>(); 
@@ -184,6 +187,8 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 				removeList.add(w);
 				//returnValue = RemovalInfo.SESSION_REMOVED;
 			}
+
+			
 			
 		}
 		if(allConnections.removeAll(removeList))
@@ -196,8 +201,23 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		System.out.println("SESSIONS UPDATE STATUS : " + returnValue.toString() );
 		
 		return returnValue;
+		
+		
 	}
 	
+	
+	synchronized public static void removeSessionByID(String sessionID )
+	{
+		for(WebSocketSessionInformation w: allConnections  )
+		{
+			if(w.sessionInformation.getSessionId().endsWith(sessionID))
+			{
+				allConnections.remove(w);
+				System.out.println("SESSIONS UPDATE STATUS" + RemovalInfo.SESSION_REMOVED);
+				return;
+			}
+		}
+	}
 	public WebSocket getWebsocket() {
 		return websocket;
 	}

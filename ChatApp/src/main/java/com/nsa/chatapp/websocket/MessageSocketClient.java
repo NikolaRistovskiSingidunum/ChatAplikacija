@@ -5,9 +5,9 @@ package com.nsa.chatapp.websocket;
 
 
 public class MessageSocketClient {
-	enum MessageType 
+	public enum MessageType 
 	{
-		GET_MESSAGE, GET_MAIL;
+		GET_MESSAGE, GET_MAIL, GET_FILE;
 	}
 	
 	private MessageType messagetype;

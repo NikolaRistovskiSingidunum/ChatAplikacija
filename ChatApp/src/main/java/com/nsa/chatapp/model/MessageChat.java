@@ -1,7 +1,9 @@
 package com.nsa.chatapp.model;
 
+import java.io.File;
 import java.time.LocalDateTime;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,9 +11,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import org.springframework.web.multipart.MultipartFile;
+//import org.apache.tomcat.jni.File;
+//import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 public class MessageChat {
@@ -53,12 +57,19 @@ public class MessageChat {
 	private ContentType contenttype;
 
 	@javax.persistence.Transient
-	@JsonIgnore
-	private MultipartFile file;
+	private byte[] file;
 	
 	
 	
 	
+	public byte[] getFile() {
+		return file;
+	}
+
+	public void setFile(byte[] file) {
+		this.file = file;
+	}
+
 	public ContentType getContenttype() {
 		return contenttype;
 	}
@@ -132,7 +143,7 @@ public class MessageChat {
 	
 
 	public MessageChat(Integer messageid, LocalDateTime dateaccepted, LocalDateTime datedeliverd, Integer senderid,
-			Integer receiverid, String text, ContentType contenttype) {
+			Integer receiverid, String text, ContentType contenttype, byte[] file) {
 		super();
 		this.messageid = messageid;
 		this.dateaccepted = dateaccepted;
@@ -141,6 +152,7 @@ public class MessageChat {
 		this.receiverid = receiverid;
 		this.text = text;
 		this.contenttype = contenttype;
+		this.file = file;
 	}
 
 	public MessageChat(Integer senderid, Integer receiverid, String text) {
@@ -149,6 +161,15 @@ public class MessageChat {
 		this.receiverid = receiverid;
 		this.text = text;
 	}
+
+	public MessageChat(Integer senderid, Integer receiverid, ContentType contenttype) {
+		super();
+		this.senderid = senderid;
+		this.receiverid = receiverid;
+		this.contenttype = contenttype;
+	}
+	
+	
 	
 	
 	

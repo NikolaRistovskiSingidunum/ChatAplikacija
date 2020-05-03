@@ -92,7 +92,7 @@ class ActiveChatboxes
     }
 
 var activeChatBoxes = new ActiveChatboxes();
-var template_chat_box = '<div class="msg-whole-chat-box" draggable="true">\
+var template_chat_box = '<div class="msg-whole-chat-box" draggable="false">\
 	<i class="fas fa-times msg-icon-delete" onclick="activeChatBoxes.remove(this.parentNode)" title="skloni" ></i>\
 	<i class="far fa-minus-square msg-icon-minimize" onclick="minimizeChatBox(this.parentNode)" title="smanji"></i>\
 			<div class="msg-box">\
@@ -104,7 +104,7 @@ var template_chat_box = '<div class="msg-whole-chat-box" draggable="true">\
 				\
 				<div>\
 	<div>\
-	<i class="fas fa-paperclip msg-icon-attach" title="prvuci fajl na kutiju ispod da ga zakacis"></i>\
+	<i class="fas fa-paperclip msg-icon-attach" title="prvuci fajl na kutiju ispod da ga zakacis" ><input class="manual-attachment" type="file" accept="image/*,.pdf" multiple></i>\
 	</div>\
     <div class="msg-attachment" ondrop="drop(event,this)" ondragover="allowDrop(event)"></div>\
 	<div contenteditable="true" class="msg-input"  ondragover="allowDrop(event)" ></div>\
@@ -247,29 +247,29 @@ function toggleVisibility(el, p)
 }
 
 //vraca true ako je korisnik uspesno kreiran
-function createChatBox_new(user)
-{
-	let b = chatboxes.has(user.username);
-	if(b==true)
-		{
-		console.log(user.username + " vec postoji u mapi " );
-		return false;
-		}
-	
-    let newChatBox = DomParser.parseFromString(template_chat_box, "text/html").body.childNodes[0];
-    newChatBox["user"] = user;
-    console.log(newChatBox["user"]);
-    //dodaj
-    chatboxes.set(user.username, newChatBox );
-    $(newChatBox).find("label").text(user.fullname);
-    $(newChatBox).find("button").attr("username",user.username);
-    $(newChatBox).find("button").text(user.fullname);
-    console.log($(newChatBox).find("label"));
-    let ch = $(".friend-list");
-    ch.append($(newChatBox));
-    
-    return true;
-}
+//function createChatBox_new(user)
+//{
+//	let b = chatboxes.has(user.username);
+//	if(b==true)
+//		{
+//		console.log(user.username + " vec postoji u mapi " );
+//		return false;
+//		}
+//	
+//    let newChatBox = DomParser.parseFromString(template_chat_box, "text/html").body.childNodes[0];
+//    newChatBox["user"] = user;
+//    console.log(newChatBox["user"]);
+//    //dodaj
+//    chatboxes.set(user.username, newChatBox );
+//    $(newChatBox).find("label").text(user.fullname);
+//    $(newChatBox).find("button").attr("username",user.username);
+//    $(newChatBox).find("button").text(user.fullname);
+//    console.log($(newChatBox).find("label"));
+//    let ch = $(".friend-list");
+//    ch.append($(newChatBox));
+//    
+//    return true;
+//}
 function createChatBox_new_new(user)
 {
     let newChatBox = DomParser.parseFromString(template_chat_box, "text/html").body.childNodes[0];
@@ -283,6 +283,24 @@ function createChatBox_new_new(user)
     console.log($(newChatBox).find("label"));
     $(newChatBox).css("visibility","hidden");
     
+    
+//    msg-icon-attach" title="prvuci fajl na kutiju ispod da ga zakacis" ><input class="manual-attachment"
+
+    //postavi file picker
+    
+    let icon_attach = $(newChatBox).find(".msg-icon-attach");
+    let input_attach = $(newChatBox).find(".manual-attachment");  
+    icon_attach.get(0).onclick = function(){ input_attach.get(0).click(); };
+    
+    input_attach.get(0).addEventListener("change", function(){
+        for(let i=0; i< input_attach.get(0).files.length ;i++)
+            addFileToMessageList(input_attach.get(0).files[i], $(newChatBox).find(".msg-attachment").get(0));
+    }
+                                         , false);
+    
+//    addFileToMessageList(file, msgList)
+    
+    //ovo je kod za zakacinjenje - ako budemo brisali moracemo i ovo da obrisemo
     let attachement =$(newChatBox).find(".msg-attachment").get(0);
     $(newChatBox).find(".msg-input").on('drop', function() { drop(event,attachement); } );
     //$("body").append($(newChatBox));
@@ -290,32 +308,76 @@ function createChatBox_new_new(user)
 //    $(newChatBox).find(".msg-input").css("color","blue");
     
     $(newChatBox).find(".msg-input").keypress(function(event){
-        var keycode = (event.keyCode ? event.keyCode : event.which);
+        let keycode = (event.keyCode ? event.keyCode : event.which);
+        //console.log(keycode);
         if(keycode == '13'){
             //alert($(newChatBox).find(".msg-input").val());
-            listAllAttachment(attachement);
+            sendAllAttachment(attachement,user.id);
             let msg = {};
             msg["text"] = $(newChatBox).find(".msg-input").text().trim();
             msg["receiverid"] =  user.id;
             
             //console.log(msg["text"].trim());
             if(msg["text"].length > 0)
+            {
             sendMessage(msg);
+            $(newChatBox).find(".msg-input").text("");
+            }
         }
+
     });
+    
+    $(newChatBox).find(".msg-input").keydown(function(event){
+    	let keycode = (event.keyCode ? event.keyCode : event.which);
+        if(keycode == '40')
+    	{
+    	//alert("aaa");
+    	let text = $(newChatBox).find(".msg-input").text();
+    	$(newChatBox).find(".msg-input").text(text+"\n");
+    	
+    	}
+    });
+    
     
     $("body").append($(newChatBox));
     
     onChatBoxCreated(newChatBox);
     return newChatBox;
 }
-function listAllAttachment(attachmentList)
+function sendAllAttachment(attachmentList, receiverid)
 {
 	attachmentList = $(attachmentList);
 	let children = attachmentList.children();
     //console.log(children);
     for( let i=0; i< children.length; i++)
+    	{
         console.log(children[i]);
+        sendFile(children[i].file,receiverid);
+        $(children[i]).remove();
+    	}
+}
+function sendFile(file,receiverid)
+{
+	 let formdata = new FormData();
+	
+	 let f = {};
+	 f["file"] = file;
+	 f["receiverid"] = receiverid;
+	 formdata.append("receiverid",receiverid);
+	 formdata.append("file", file);
+	 formdata.append("text", file.type)
+	  $.ajax({
+		    type: "POST",
+		    url: springservice+"file-proxy",
+		    data: formdata,
+		    contentType: false,
+		    processData: false,
+		    async: false
+		
+		});
+	  
+	  
+	  console.log(formdata);
 }
 //function sendMessage(msg)
 //{
@@ -340,29 +402,29 @@ var chatBoxToggler = [];
 
 
 
-function createChatBox(el)
-{
-	
-	
-	let newChatBox = DomParser.parseFromString(template_chat_box, "text/html").body.childNodes[0];
-	let jqEl = $(el);
-	let domRect = el.getBoundingClientRect();
-    console.log(domRect);
-//	if(newChatBox instanceof Element || newChatBox instanceof HTMLDocument)
-//		alert("koji kurac");
-	let w = newChatBox.style.width;
-    let h = newChatBox.style.height;
-    let left = domRect.left;
-    //left = jqEl.offset().left;
-    //left = 200;
-    alert(left);
-    let top  = domRect.top;
-    let h1 = el.style.height;
-    //newChatBox.style.position = "fixed";
-    newChatBox.style.left= left;
-    newChatBox.style.top = top - 150; 
-	document.body.appendChild(newChatBox);
-}
+//function createChatBox(el)
+//{
+//	
+//	
+//	let newChatBox = DomParser.parseFromString(template_chat_box, "text/html").body.childNodes[0];
+//	let jqEl = $(el);
+//	let domRect = el.getBoundingClientRect();
+//    console.log(domRect);
+////	if(newChatBox instanceof Element || newChatBox instanceof HTMLDocument)
+////		alert("koji kurac");
+//	let w = newChatBox.style.width;
+//    let h = newChatBox.style.height;
+//    let left = domRect.left;
+//    //left = jqEl.offset().left;
+//    //left = 200;
+//    alert(left);
+//    let top  = domRect.top;
+//    let h1 = el.style.height;
+//    //newChatBox.style.position = "fixed";
+//    newChatBox.style.left= left;
+//    newChatBox.style.top = top - 150; 
+//	document.body.appendChild(newChatBox);
+//}
 var createdChatBoxes = [];
 function onChatBoxCreated(box)
 {

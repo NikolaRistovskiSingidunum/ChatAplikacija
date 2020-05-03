@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,7 +27,14 @@ public class LoggedUser {
 	}
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(
+		    strategy= GenerationType.AUTO,
+		    generator="native"
+		)
+		@GenericGenerator(
+		    name = "native",
+		    strategy = "native"
+		)
 	private Integer id;
 	
 	

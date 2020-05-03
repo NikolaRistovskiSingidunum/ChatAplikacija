@@ -10,8 +10,84 @@ var template_message = '<div class="msg-container">\
 						<p class="msg-msg"> Ovo je neki tekst  </p>\
 						<p class="msg-status"> status poruke </p>\
 						</div>';
+var template_message_file = '<div class="msg-container center-aligment"> \
+                                <p class="msg-name"> </p>\
+								<p class="msg-msg"> </p>\
+                                <img class="msg-read-img no-drag"> </img>\
+                                </div>';
 
-//kreira poruku po sablonu
+
+//ovo takodje stavlja poruku na pravo mesto, u pravu kutiju, i podesava parametre bazirano na poruci koja je stigla sa servera
+function create_message_file(response) {
+	let msg = DomParser.parseFromString(template_message_file, "text/html").body.childNodes[0];
+
+	msg.messageid = response.messageid;
+	
+	let msgType = response.messagetype;
+	let box;
+
+    if(response.senderid == me.id)
+        {
+            msgType="FROM_ME";
+        }
+    else
+        {
+            msgType="TO_ME";
+        }
+    
+	let firstname;
+	if (msgType == "TO_ME") {
+		box = getChatBoxByUserID(response.senderid);
+		$(msg).css("color", "green");
+		$(msg).css("float", "right");
+		$(msg).find(".msg-name").css("float", "right");
+		$(msg).find(".msg-read-msg").css("clear", "both");
+		firstname = getFirstNameFromID(response.senderid);
+
+	} else {
+		box = getChatBoxByUserID(response.receiverid);
+		$(msg).css("color", "brown");
+		firstname = getFirstNameFromID(response.senderid);
+	}
+	$(msg).find(".msg-name").text(firstname + response.messageid);
+	placeMsgToRightPlace(box, msg);
+
+
+	
+	// $(newMessage).find(".msg-name").text(senderName);
+	let img = $(msg).find(".msg-read-img").get(0);
+	var oReq = new XMLHttpRequest();
+	oReq.open("GET", springservice + "file/" + response.messageid, true);
+	oReq.responseType = "blob";
+
+	oReq.onload = function(oEvent) {
+		var blob = oReq.response;
+		var file = new File([ blob ], "name" + response.messageid, {type: response.text });
+		let localURL = URL.createObjectURL(file);
+		file.type = response.text;
+		console.log(file);
+		console.log("AAAAAAA" + response.text);
+		
+		img.src = localURL;
+		img.onclick = function() {
+			open(localURL);
+		};
+		img.onerror = function() {
+			img.src = "/img/file.png";
+		};
+		// img.onerror= (img) => { img.src='/img/file.png'; } ;
+
+
+
+		
+		// ...
+	};
+
+	oReq.send();
+
+}
+
+// kreira poruku po sablonu
 function create_message(text)
 {
 	let newMessage = DomParser.parseFromString(template_message, "text/html").body.childNodes[0];
@@ -34,7 +110,8 @@ function sendMessage(msg)
 	  $.ajax({
 		    type: "POST",
 		    url: springservice+"message-proxy",
-		    data: msg
+		    data: msg,
+		    async: false
 		
 		});
 }
@@ -43,10 +120,21 @@ function getMessage(msgID)
 	  $.ajax({
 		    type: "GET",
 		    url: springservice+"message/"+msgID,
-		    success: onGetMessage
+		    success: onGetMessage,
+		    async: false
 		
 		});
 }
+
+//function getFile(fileID)
+//{
+//	  $.ajax({
+//		    type: "GET",
+//		    url: springservice+"fileID/"+msgID,
+//		    success: onGetMessage
+//		
+//		});
+//}
 //ova fukcija se poziva kada je lista prijatelja dostavljenja
 function loadLast50forAll()
 {
@@ -61,13 +149,14 @@ function getMessagesLast50(friendID)
 	  $.ajax({
 		    type: "GET",
 		    url: springservice+"message-last/"+friendID,
-		    success: onGetMessagesLast50
+		    success: onGetMessagesLast50,
+		    async: false
 		
 		});
 }
 function onGetMessagesLast50(response)
 {
-	console.log(response);
+	//console.log(response + "AAAAAAAAAAAAAAAAAAAAA");
 	for(let i=0; i< response.length ; i++)
 		onGetMessage(response[i],true);
 }
@@ -76,10 +165,64 @@ function onGetMessagesLast50(response)
 //reposne je vec js objekat
 function onGetMessage(response,preLoading)
 {
+	if(response.contenttype === "FILE")
+		{
+            create_message_file(response);
+            return;
+		
+		var oReq = new XMLHttpRequest();
+		oReq.open("GET", springservice+"file/"+response.messageid, true);
+		oReq.responseType = "blob";
+
+		oReq.onload = function(oEvent) {
+		  var blob = oReq.response;
+		  var file = new File([blob], "name" + response.messageid);
+		  file.type = response.text;
+		  let localURL = URL.createObjectURL(file);
+		  console.log(file);
+		  console.log("gggggg");
+			let img = new Image();
+			img.src = localURL;
+			img.onclick = function() { open(localURL); };
+			img.onerror = function() {img.src ="/img/file.png"; };
+			//img.onerror= (img) => { img.src='/img/file.png';  } ;
+			$("body").append($(img));
+		  
+		  // ...
+		};
+
+		oReq.send();
+		
+//		console.log(response.file);
+//		console.log(typeof response.file );
+//		let enc = new TextEncoder('utf-8');
+//		//let blob=new File(enc.encode(response.file),  { type: "" });
+//		let blob=new File( enc.encode( response.file ),  { type: "image/jpeg" });
+//		let localURL = URL.createObjectURL(blob);
+//		open(localURL);
+//		console.log(blob);
+		
+//		let img = new Image();
+//		img.src = springservice+"file/"+response.messageid;
+//		img.onerror= (img) => { img.src='/img/file.png';  } ;
+//		$("body").append($(img));
+		return;
+		}
 	let msgType = response.messagetype;
 	let box;
 	let msg = create_message(response.text + "  " + response.messageid);
 	let firstname;
+    
+       if(response.senderid == me.id)
+        {
+            msgType="FROM_ME";
+        }
+    else
+        {
+            msgType="TO_ME";
+        }
+    
+	console.log(response);
 	if(msgType == "TO_ME")
 		{
 		box = getChatBoxByUserID(response.senderid);
@@ -88,13 +231,14 @@ function onGetMessage(response,preLoading)
 		$(msg).find(".msg-name").css("float","right");
 		$(msg).find(".msg-msg").css("clear","both");
 		firstname = getFirstNameFromID(response.senderid);
-		
+		console.log(response.senderid);
 		}
 	else
 		{
 		box =getChatBoxByUserID(response.receiverid);
 		$(msg).css("color","brown");
 		firstname = getFirstNameFromID(response.senderid);
+		console.log(response.receiverid);
 		}
 	messageSetTextAndName(msg, response.text + "  " + response.messageid,firstname+":" );
 	//let box = getChatBoxByUserID(response.receiverid);
@@ -125,12 +269,14 @@ function effectsWhenMessageArrives(box)
 //box je dom(js) elementar, msg je dom elemnat
 function placeMsgToRightPlace(box, msg)
 {
+    console.log("aaa" + msg.messageid);
 	msg = $(msg);
 	let msgid = msg.get(0).messageid;
 	let read = $(box).find(".msg-read");
 	let deca = read.find("div"); //children 
 	//let deca1 = jQuery.makeArray(deca); // deca.makeArray();
 	//deca1.sort(function(a, b){return a.messageid-b.messageid});
+	
 	let l =deca.length;
 	if(l==1)
 		{
@@ -176,4 +322,10 @@ function messageRouter(msg)
 		 getMessage(msg.messageid);
 		 return;
 		}
+	
+	if(msg.messagetype == "GET_FILE")
+	{
+	 getMessage(msg.messageid);
+	 return;
+	}
 }

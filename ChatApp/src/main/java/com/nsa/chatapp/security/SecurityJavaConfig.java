@@ -1,5 +1,7 @@
 package com.nsa.chatapp.security;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +13,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import com.nsa.chatapp.websocket.WebSocketSessionInformation;
 
 
 @EnableWebSecurity
@@ -45,18 +51,35 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/index.html").hasRole("LOGGEDUSER")
         .antMatchers("/**").hasRole("LOGGEDUSER")
         .and().anonymous().authorities("ROLE_SOMEBODY")
+        
         //.and().authorizeRequests().antMatchers("/comment").hasIpAddress("127.0.0.1")
 //        .and().authorizeRequests().antMatchers("/comment").hasRole("SOMEBODY")
 //       
 //        .antMatchers(HttpMethod.POST, "/comment").hasRole("ADMIN")
 //        
 //        
-        
+ 
         //.antMatchers("/").permitAll()
         .and().formLogin()
         .and().csrf().disable();
        
         http.sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistry());
+   
+        http
+        .logout()
+        .logoutSuccessUrl("/index.html")
+        .invalidateHttpSession(true)
+        .clearAuthentication(true)
+        .deleteCookies("JSESSIONID").addLogoutHandler(new LogoutHandler() {
+			
+			@Override
+			public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+				// TODO Auto-generated method stub
+				
+			 	String sessionID = request.getSession().getId();
+			 	WebSocketSessionInformation.removeSessionByID(sessionID);
+			}
+		});
         
 //        http.anonymous().and().authorizeRequests()
 //        .antMatchers("/comment").hasIpAddress("127.0.0.1");

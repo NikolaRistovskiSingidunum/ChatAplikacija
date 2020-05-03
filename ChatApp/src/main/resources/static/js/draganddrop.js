@@ -11,11 +11,13 @@ const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 const validFileTypes = []; //to do
 //ovo se odnosi na multipar
 var template_image = '<div>\
-                    <img class="msg-img" ></img>\
+                    <img class="msg-img no-drag" ></img>\
 					<i class="fas fa-times msg-file-delete" onclick="$(this.parentNode).remove();" title="skloni" ></i>\
                          </div>';
                         
 function drop(event,target) {
+	
+	console.log("BBBBBBBBB");
 	console.log(event.dataTransfer.files[0]);
 	console.log(event.dataTransfer.files[0]['type']);
 	
@@ -42,9 +44,20 @@ function drop(event,target) {
 	img.title = event.dataTransfer.files[0]['name'];
 	$( target ).append(template);
 }
+
+
 function addFileToMessageList(file, msgList)
 {
+	
 	event.preventDefault();
+	
+	
+	if(file.size==0)
+		{
+			console.log("neispravan tip fajla");
+			
+			return;
+		}
 	//let target = msgList;
     let template = DomParser.parseFromString(template_image, "text/html").body.childNodes[0];
     let img = $(template).find(".msg-img").get(0);

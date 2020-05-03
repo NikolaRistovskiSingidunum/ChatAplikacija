@@ -23,14 +23,28 @@ public class AdminController {
 	public ResponseEntity<LoggedUser> putAdmin(LoggedUser admin) {
 		//System.out.print(admin.getPassword());
 		//
-		return new ResponseEntity(authUserDetailsRepository.save(admin.encode()), HttpStatus.I_AM_A_TEAPOT);
+		//addA();
+		return new ResponseEntity(authUserDetailsRepository.save(admin.encode()), HttpStatus.OK);
+		
+//		LoggedUser u = admin.encode();
+//		
+//		u = authUserDetailsRepository.add(u.getFullname(), u.getPassword(), u.getRole(), u.getUsername());
+//		return new ResponseEntity(u, HttpStatus.OK);
 	}
-	
+	@RequestMapping(value = "/a", method = RequestMethod.GET)
+	void addA()
+	{
+		for(int i=1;i<1000;i++)
+		{
+			LoggedUser l = new LoggedUser(""+i, ""+i, "ROLE_LOGGEDUSER",""+i).encode();
+			authUserDetailsRepository.save(l);
+		}
+	}
 	@RequestMapping(value = "/admin/{username}", method = RequestMethod.GET)
 	public ResponseEntity<LoggedUser> findAdmin(@PathVariable(value="username") String username ) {
 		//System.out.print(admin.getPassword());
 		//
-		return new ResponseEntity(authUserDetailsRepository.findByUsername(username), HttpStatus.I_AM_A_TEAPOT);
+		return new ResponseEntity(authUserDetailsRepository.findByUsername(username), HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/allusers", method = RequestMethod.GET)

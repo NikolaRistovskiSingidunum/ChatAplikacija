@@ -1,10 +1,18 @@
 // Create WebSocket connection.
 
+//const sockethost = "ws://localhost:8887";
+//const springservice = "http://localhost:9090/";
+var me;
+//const sockethost = "ws://178.223.46.148:8887";
+//const springservice = "http://178.223.46.148:9090/";
+
+
 const sockethost = "ws://localhost:8887";
 const springservice = "http://localhost:9090/";
 
-//const sockethost = "ws://192.168.1.7:8887";
-//const springservice = "http://192.168.1.7:9090/";
+
+//const sockethost = "ws://192.168.1.13:8887";
+//const springservice = "http://192.168.1.13:9090/";
 //socket = new WebSocket('ws://localhost:8887');
 //
 //// Connection opened
@@ -101,6 +109,14 @@ function login()
 }
 function logout()
 {
+	//localhost:9090/logout
+	  $.ajax({
+		    type: "GET",
+		    url: springservice +"logout",
+		    async:false,
+		    success: function() { location.reload();} 
+		
+		});
 }
 
 
