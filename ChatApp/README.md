@@ -6,7 +6,7 @@ Apilakcija je napravljenje u Spring Boot na serveru i HTML tehnologijama na klij
 
 
 This is a chat application.
-Supported functionalities are message and multimedial files sending and receiving. Additional functionalities are overview of older messages( the main page will not be poluted with old messages
+Supported functionalities are messages and multimedia files sending and receiving. Additional functionalities are overview of older messages( the main page will not be poluted with old messages
 unless a user explicitly wants such an option)
 
 Used tehnologies are Spring Boot on the server side and HTML tehnologies on the client side. 
