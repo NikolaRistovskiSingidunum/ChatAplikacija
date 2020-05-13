@@ -23,12 +23,17 @@ body
     overflow-y: scroll;
     
 }
+
+.chat-box-width
+{
+	 width: 200px;
+}
 .msg-whole-chat-box
 {
 	background-color: lightblue; 
     border-top-left-radius: 25px;
     
-     width: 200px;
+    
     
 }
 .msg-label
@@ -92,7 +97,7 @@ body
   bottom: 0;
   right: 0;
   width: 180px;
-  height:500px;
+  height:45%;
   border: 3px solid #73AD21;
 }
 
@@ -230,16 +235,7 @@ body
 	font-size: 12px;
 	
 }
-.user-details
-{
-  font-size: 25px;	
-  position: fixed;
-  background-color: aqua;
-  top: 0;
-  right: 0;
-  width: 20% ;
-  height: 100px;
-}
+
 .msg-container
 {
 	clear: both;
@@ -316,3 +312,6 @@ user-select: none;
 -webkit-user-select: none;
 -ms-user-select: none;
 }
+
+
+

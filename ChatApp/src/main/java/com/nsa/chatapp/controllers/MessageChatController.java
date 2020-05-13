@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nsa.chatapp.model.LoggedUser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nsa.chatapp.model.AuthUserDetails;
 import com.nsa.chatapp.model.Comment;
@@ -48,60 +49,49 @@ public class MessageChatController {
 	MessageChatRepository messageChatRepository;
 	
 	
-	//transactional nije potrebno
-	//@Transactional
-	//@Transactional(isolation = Isolation.)
+	// transactional nije potrebno
+	// @Transactional
+	// @Transactional(isolation = Isolation.)
 	@Secured({ "ROLE_LOGGEDUSER" })
 	@RequestMapping(value = { "/message/{id}", "/poruku/{id}" }, method = RequestMethod.GET)
-	public ResponseEntity<MessageChat> get(Authentication authentication,@PathVariable(value = "id") Integer id) throws IOException, InterruptedException {
-		
-		
-	
-		AuthUserDetails userDetails = (AuthUserDetails) (authentication.getPrincipal());
-		
+	public ResponseEntity<MessageChat> get(Authentication authentication, @PathVariable(value = "id") Integer id)
+			throws IOException, InterruptedException {
 
-		System.out.println(userDetails.getAdminID() +  "  ADMINID");
-		
+		AuthUserDetails userDetails = (AuthUserDetails) (authentication.getPrincipal());
+
+		System.out.println(userDetails.getAdminID() + "  ADMINID");
+
 		MessageChat m = messageChatRepository.findById(id).get();
+
+//		String s = new ObjectMapper().writeValueAsString(userDetails);
+//		System.out.println(s);
+
+//			System.out.println(userDetails.getAdminID() +  "  ADMINID " + m.getReceiverid() + " RECEIVER ID" + m.getSenderid() + " SENDER ID" );
+		// Ako je u pitanju poruka tipa faj, onda ga i ucitaj
+//		if (m.getContenttype() == ContentType.FILE)
+//			m.setFile(loadFileFromName(m.getMessageid()));
+
+		// markMessage(m, userDetails.getAdminID());
+
+		// System.out.println( "Msg Type " + m.getMessagetype());
+
+		boolean bHasAccess = false;
 		
-		String s = new ObjectMapper().writeValueAsString(userDetails);
-		System.out.println(s);
-		
-//		if (m == null || userDetails == null)
-//			return new ResponseEntity(null, HttpStatus.NO_CONTENT);
-//		else {
-			
-			
-			System.out.println(userDetails.getAdminID() +  "  ADMINID " + m.getReceiverid() + " RECEIVER ID" + m.getSenderid() + " SENDER ID" );
-			//Ako je u pitanju poruka tipa faj, onda ga i ucitaj
-			if(m.getContenttype()==ContentType.FILE)
-				m.setFile(loadFileFromName(m.getMessageid()));
-			
-			//markMessage(m, userDetails.getAdminID());
-			
-			//System.out.println( "Msg Type " + m.getMessagetype());
-			synchronized (this) {
-				
-			
-			if (m.getReceiverid() == userDetails.getAdminID())
-				m.setMessagetype(MessageType.TO_ME);
-			else if( m.getSenderid() == userDetails.getAdminID())
-				m.setMessagetype(MessageType.FROM_ME);
-			else
-				System.out.println("Greska" + "adminID " + userDetails.getAdminID() +" receiverID:" + m.getReceiverid() + "senderID:" +  m.getSenderid() );
-			
-			}
-			System.out.println( "Msg Type " + m.getMessagetype());
-			
-			System.out.println(new ObjectMapper().writeValueAsString(m));
-			
-			
+		if (m.getReceiverid().equals(userDetails.getAdminID())) {
+			m.setMessagetype(MessageType.TO_ME);
+			bHasAccess = true;
+		} else if (m.getSenderid().equals(userDetails.getAdminID())) {
+			m.setMessagetype(MessageType.FROM_ME);
+			bHasAccess = true;
+		}
+
+		if (bHasAccess)
 			return new ResponseEntity(m, HttpStatus.OK);
-			
-			
+		else
+			return new ResponseEntity(null, HttpStatus.NO_CONTENT);
+		
 //		}
-		
-		
+
 	}
 	
 	//Uzmi 50 zadnjih poruka od ili ka datom prijatelju
@@ -113,6 +103,30 @@ public class MessageChatController {
 
 		Iterable<MessageChat> msgs = messageChatRepository.getLastMessages(userDetails.getAdminID(), friendid, 50);
 
+		markMessages(msgs, userDetails.getAdminID());
+
+		return new ResponseEntity(msgs, HttpStatus.OK);
+	}
+	
+	//Uzmi prethodne poruke 
+	@Secured({ "ROLE_LOGGEDUSER" })
+	@RequestMapping(value = { "/message-last-less", "/poruka-zadnje-pre" }, method = RequestMethod.GET)
+	public ResponseEntity<Iterable<MessageChat>> getLastMessageLessThan(Authentication authentication,Integer friendID
+			,Integer lastMessageID ) {
+
+		
+		System.out.println("F"+friendID + " L " +lastMessageID);
+		AuthUserDetails userDetails = (AuthUserDetails) (authentication.getPrincipal());
+
+		Iterable<MessageChat> msgs = messageChatRepository.getLastMessagesLessThanSome(userDetails.getAdminID(), friendID, 50,lastMessageID);
+
+		try {
+			System.out.println(new ObjectMapper().writeValueAsString(msgs) );
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		markMessages(msgs, userDetails.getAdminID());
 
 		return new ResponseEntity(msgs, HttpStatus.OK);
@@ -210,26 +224,48 @@ public class MessageChatController {
 	}
 	private void markMessage(MessageChat message, Integer id)
 	{
-		if (message.getReceiverid() == id)
+		if (message.getReceiverid().equals(id))
 			message.setMessagetype(MessageType.TO_ME);
 		else
 			message.setMessagetype(MessageType.FROM_ME);
 	}
 
 	
-	private byte[] loadFileFromName(Integer fileID) throws IOException
-	{
-		//File file = new File( System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + 235 );
-		String filePath = System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + 235 ;
-		byte[] bFile = Files.readAllBytes(Paths.get(filePath));
-		
-		return bFile;
-	}
+//	private byte[] loadFileFromName(Integer fileID) throws IOException
+//	{
+//		//File file = new File( System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + 235 );
+//		String filePath = System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + 235 ;
+//		byte[] bFile = Files.readAllBytes(Paths.get(filePath));
+//		
+//		return bFile;
+//	}
 	
+	@Secured({ "ROLE_LOGGEDUSER" })
 	@RequestMapping(value = { "/file/{fileID}", "/file/{fileID}" }, method = RequestMethod.GET)
-	public byte[] getFile(@PathVariable(value = "fileID") Integer fileID) throws IOException {
-		String filePath = System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + fileID;
-		byte[] bFile = Files.readAllBytes(Paths.get(filePath));
+	public byte[] getFile(Authentication authentication, @PathVariable(value = "fileID") Integer fileID) throws IOException {
+		
+		AuthUserDetails userDetails = (AuthUserDetails) (authentication.getPrincipal());
+		MessageChat m = messageChatRepository.findById(fileID).get();
+		
+		byte[] bFile = null;
+		
+		//proveri kome fajl pripada
+		if(userDetails !=null && m!=null 
+				&& m.getSenderid()!=null
+				&& m.getReceiverid()!=null 
+				&& ( m.getSenderid().equals(userDetails.getAdminID()) ||  m.getReceiverid().equals(userDetails.getAdminID() )   ) 
+				)
+		{
+			
+			String filePath = System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + fileID;
+			bFile = Files.readAllBytes(Paths.get(filePath));
+			
+			return bFile;
+
+		}
+				
+//		String filePath = System.getProperty("user.dir") + "/src/main/resources/static/userfiles/" + fileID;
+//		Files.readAllBytes(Paths.get(filePath));
 
 		return bFile;
 	}

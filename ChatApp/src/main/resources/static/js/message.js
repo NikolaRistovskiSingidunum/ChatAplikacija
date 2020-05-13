@@ -18,23 +18,20 @@ var template_message_file = '<div class="msg-container center-aligment"> \
 
 
 //ovo takodje stavlja poruku na pravo mesto, u pravu kutiju, i podesava parametre bazirano na poruci koja je stigla sa servera
-function create_message_file(response) {
+function create_message_file(response, preLoading) {
 	let msg = DomParser.parseFromString(template_message_file, "text/html").body.childNodes[0];
 
 	msg.messageid = response.messageid;
-	
+
 	let msgType = response.messagetype;
 	let box;
 
-    if(response.senderid == me.id)
-        {
-            msgType="FROM_ME";
-        }
-    else
-        {
-            msgType="TO_ME";
-        }
-    
+	if (response.senderid == me.id) {
+		msgType = "FROM_ME";
+	} else {
+		msgType = "TO_ME";
+	}
+
 	let firstname;
 	if (msgType == "TO_ME") {
 		box = getChatBoxByUserID(response.senderid);
@@ -52,34 +49,38 @@ function create_message_file(response) {
 	$(msg).find(".msg-name").text(firstname + response.messageid);
 	placeMsgToRightPlace(box, msg);
 
-
-	
 	// $(newMessage).find(".msg-name").text(senderName);
 	let img = $(msg).find(".msg-read-img").get(0);
 	var oReq = new XMLHttpRequest();
+	//fajl moze asinhroni jer je vec na pravom mestu
 	oReq.open("GET", springservice + "file/" + response.messageid, true);
 	oReq.responseType = "blob";
 
 	oReq.onload = function(oEvent) {
 		var blob = oReq.response;
-		var file = new File([ blob ], "name" + response.messageid, {type: response.text });
+		var file = new File([ blob ], "name" + response.messageid, {
+			type : response.text
+		});
 		let localURL = URL.createObjectURL(file);
 		file.type = response.text;
 		console.log(file);
 		console.log("AAAAAAA" + response.text);
-		
+		//
 		img.src = localURL;
 		img.onclick = function() {
 			open(localURL);
 		};
 		img.onerror = function() {
 			img.src = "/img/file.png";
+
 		};
+
+		if (preLoading !== true) {
+			effectsWhenMessageArrives(box);
+			img.scrollIntoView();
+		}
 		// img.onerror= (img) => { img.src='/img/file.png'; } ;
 
-
-
-		
 		// ...
 	};
 
@@ -144,12 +145,29 @@ function loadLast50forAll()
 		getMessagesLast50(friendid);
 		}
 }
+//dobavlja zadnjih 50 poruka za 
 function getMessagesLast50(friendID)
 {
 	  $.ajax({
 		    type: "GET",
 		    url: springservice+"message-last/"+friendID,
 		    success: onGetMessagesLast50,
+		    async: false
+		
+		});
+}
+//dobavlja sve poruke ciji je id manji od date poruke
+function getMessagesLastLess(friendID, lastMessageID)
+{
+	console.log(friendID, lastMessageID);
+	let d = {};
+	d.friendID = friendID;
+	d.lastMessageID = lastMessageID;
+	  $.ajax({
+		    type: "GET",
+		    url: springservice+"message-last-less/",
+		    success: onGetMessagesLast50,
+		    data: d,
 		    async: false
 		
 		});
@@ -163,158 +181,124 @@ function onGetMessagesLast50(response)
 
 
 //reposne je vec js objekat
-function onGetMessage(response,preLoading)
-{
-	if(response.contenttype === "FILE")
-		{
-            create_message_file(response);
-            return;
-		
-		var oReq = new XMLHttpRequest();
-		oReq.open("GET", springservice+"file/"+response.messageid, true);
-		oReq.responseType = "blob";
-
-		oReq.onload = function(oEvent) {
-		  var blob = oReq.response;
-		  var file = new File([blob], "name" + response.messageid);
-		  file.type = response.text;
-		  let localURL = URL.createObjectURL(file);
-		  console.log(file);
-		  console.log("gggggg");
-			let img = new Image();
-			img.src = localURL;
-			img.onclick = function() { open(localURL); };
-			img.onerror = function() {img.src ="/img/file.png"; };
-			//img.onerror= (img) => { img.src='/img/file.png';  } ;
-			$("body").append($(img));
-		  
-		  // ...
-		};
-
-		oReq.send();
-		
-//		console.log(response.file);
-//		console.log(typeof response.file );
-//		let enc = new TextEncoder('utf-8');
-//		//let blob=new File(enc.encode(response.file),  { type: "" });
-//		let blob=new File( enc.encode( response.file ),  { type: "image/jpeg" });
-//		let localURL = URL.createObjectURL(blob);
-//		open(localURL);
-//		console.log(blob);
-		
-//		let img = new Image();
-//		img.src = springservice+"file/"+response.messageid;
-//		img.onerror= (img) => { img.src='/img/file.png';  } ;
-//		$("body").append($(img));
+function onGetMessage(response, preLoading) {
+	if (response.contenttype === "FILE") {
+		create_message_file(response, preLoading);
 		return;
-		}
+
+	}
 	let msgType = response.messagetype;
 	let box;
 	let msg = create_message(response.text + "  " + response.messageid);
 	let firstname;
-    
-       if(response.senderid == me.id)
-        {
-            msgType="FROM_ME";
-        }
-    else
-        {
-            msgType="TO_ME";
-        }
-    
+
+	if (response.senderid == me.id) {
+		msgType = "FROM_ME";
+	} else {
+		msgType = "TO_ME";
+	}
+
 	console.log(response);
-	if(msgType == "TO_ME")
-		{
+	if (msgType == "TO_ME") {
 		box = getChatBoxByUserID(response.senderid);
-		$(msg).css("color","green");
-		$(msg).css("float","right");
-		$(msg).find(".msg-name").css("float","right");
-		$(msg).find(".msg-msg").css("clear","both");
+		$(msg).css("color", "green");
+		$(msg).css("float", "right");
+		$(msg).find(".msg-name").css("float", "right");
+		$(msg).find(".msg-msg").css("clear", "both");
 		firstname = getFirstNameFromID(response.senderid);
 		console.log(response.senderid);
-		}
-	else
-		{
-		box =getChatBoxByUserID(response.receiverid);
-		$(msg).css("color","brown");
+	} else {
+		box = getChatBoxByUserID(response.receiverid);
+		$(msg).css("color", "brown");
 		firstname = getFirstNameFromID(response.senderid);
 		console.log(response.receiverid);
-		}
-	messageSetTextAndName(msg, response.text + "  " + response.messageid,firstname+":" );
-	//let box = getChatBoxByUserID(response.receiverid);
+	}
+	messageSetTextAndName(msg, response.text + "  " + response.messageid,
+			firstname + ":");
+	// let box = getChatBoxByUserID(response.receiverid);
 	let read = $(box).find(".msg-read");
-	//let msg = create_message(response.text + "  " + response.messageid);
+	// let msg = create_message(response.text + " " + response.messageid);
 	msg.messageid = response.messageid;
-	
-	
-	//prikazi prozor kada stigne poruka ako nismo u loadovanju
-	if(preLoading !== true)
-		{
+
+	// prikazi prozor kada stigne poruka ako nismo u loadovanju
+	if (preLoading !== true) {
 		effectsWhenMessageArrives(box);
-		}
-	
+	}
+
 	placeMsgToRightPlace(box, msg);
-	//read.append(msg);
-	//response = JSON.parse(response);
-	//console.log("neka poruka");
-	//console.log(response.receiverid);
-	//console.log("neka poruka");
+	// read.append(msg);
+	// response = JSON.parse(response);
+	// console.log("neka poruka");
+	// console.log(response.receiverid);
+	// console.log("neka poruka");
 }
 function effectsWhenMessageArrives(box)
 {
+	//samo za desktop
+	//if(isMobile()==false)
 	activeChatBoxes.activate(box);
+}
+//nalazi id zadnje poruke u kutiju
+function findLastMessageID(box)
+{
+	
+	let read = $(box).find(".msg-read");
+	let deca = read.find("div"); // children
+	let length =deca.length;
+	//ako je u kutiji manje od 50 poruka, onda prethodne i ne postoje,ovo bi tebao da bude dinamicki parametar 
+	if(length<50)
+		return -1; 
+	let minID=deca[0].messageid ;
+	
+	return minID;
 }
 //stavi poruku na svoje mesto u kutiji, izmedju dve poruke - ako je poruka sa id =255 ona ide izmedju dve uzastopne npr. 234 - 264
 //poruke nisu uzastopne jer su u tabeli
 //box je dom(js) elementar, msg je dom elemnat
-function placeMsgToRightPlace(box, msg)
-{
-    console.log("aaa" + msg.messageid);
+function placeMsgToRightPlace(box, msg) {
+	console.log("aaa" + msg.messageid);
 	msg = $(msg);
 	let msgid = msg.get(0).messageid;
 	let read = $(box).find(".msg-read");
-	let deca = read.find("div"); //children 
-	//let deca1 = jQuery.makeArray(deca); // deca.makeArray();
-	//deca1.sort(function(a, b){return a.messageid-b.messageid});
-	
-	let l =deca.length;
-	if(l==1)
+	let deca = read.find("div"); // children
+	// let deca1 = jQuery.makeArray(deca); // deca.makeArray();
+	// deca1.sort(function(a, b){return a.messageid-b.messageid});
+
+	let l = deca.length;
+	if (l == 1) {
+		if (deca[0].messageid > msgid) // 85< 64
 		{
-		if(deca[0].messageid>msgid) // 85< 64
-			{
 			msg.insertBefore(deca[0]);
-			}
-		else
-			{
+		} else {
 			read.append(msg);
-			}
-		return;
 		}
-	if(l>=1 && deca[0].messageid > msgid)
-		{
+		return;
+	}
+	if (l >= 1 && deca[0].messageid > msgid) {
 		msg.insertBefore(deca[0]);
 		return;
+	}
+	for (let i = 0; i < deca.length - 1; i++) {
+		let g = deca[i + 1].messageid;
+		if ((deca[i].messageid > msgid) && (deca[i + 1].messageid < msgid)) {
+			msg.insertAfter(deca[i]);
+			return;
 		}
-	for (let i=0; i< deca.length-1; i++)
-		{
-		let g = deca[i+1].messageid;
-			if( (deca[i].messageid > msgid) && (deca[i+1].messageid < msgid) )
-				{
-				 msg.insertAfter(deca[i]);
-				 return;
-				}
-			if( (deca[i].messageid == msgid) || (deca[i+1].messageid == msgid) )
-				return;
-		}
-	
+		if ((deca[i].messageid == msgid) || (deca[i + 1].messageid == msgid))
+			return;
+	}
+
 	read.append(msg);
-	//read.get(0).scrollTop = 1000;
+	// read.get(0).scrollTop = 1000;
 	msg.get(0).scrollIntoView();
-	
+
 }
 function messageRouter(msg)
 {
+	
 	msg = JSON.parse(msg.data);
+	
+	console.log(msg);
 //	console.log("poruka " + msg.data);
 //	console.log(msg.messagetype);
 	if(msg.messagetype == "GET_MESSAGE")
@@ -328,4 +312,16 @@ function messageRouter(msg)
 	 getMessage(msg.messageid);
 	 return;
 	}
+//    if(msg.messagetype == "GET_FRIEND_LIST")
+//	{ 
+//	 getFriendList();
+//	 return;
+//	}
+//    if(msg.messagetype == "GET_LAST_50")
+//	{
+//     loadLast50forAll();
+//	 //getLas
+//	 return;
+//	}
+	
 }

@@ -24,10 +24,16 @@ public interface MessageChatRepository extends JpaRepository<MessageChat, Intege
 //	select * from message_chat
 //	where (senderid=2 and receiverid=4) or (senderid=4 and receiverid=2)
 //	order by messageid desc LIMIT 10
-		@Query(
-			  value = "	select * from message_chat\r\n" + 
-			  		"	where (senderid=?1 and receiverid=?2) or (senderid=?2 and receiverid=?1)\r\n" + 
-			  		"	order by messageid desc LIMIT ?3" , 
-			  nativeQuery = true)
+	//uzima zadnjim last poruku
+	@Query(value = "	select * from message_chat\r\n"
+			+ "	where (senderid=?1 and receiverid=?2) or (senderid=?2 and receiverid=?1)\r\n"
+			+ "	order by messageid desc LIMIT ?3", nativeQuery = true)
 	Iterable<MessageChat> getLastMessages(Integer friend1, Integer friend2, Integer last);
+		
+	
+	//uzima zadnje poruke koje su manje od nekog broja - koristi se da ucitamo prethodne poruke	
+	@Query(value = "	select * from message_chat\r\n"
+			+ "	where (messageid<?4) and  ((senderid=?1 and receiverid=?2) or (senderid=?2 and receiverid=?1))\r\n"
+			+ "	order by messageid desc LIMIT ?3", nativeQuery = true)
+	Iterable<MessageChat> getLastMessagesLessThanSome(Integer friend1, Integer friend2, Integer last, Integer lessThan);	
 }

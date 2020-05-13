@@ -1,0 +1,14 @@
+.user-details
+{
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  align-content: center;
+  text-align: center;  
+  border-radius: 100%;
+  background-color: lightskyblue;
+  padding: 5px;
+  padding-bottom: 0;
+}
+
+

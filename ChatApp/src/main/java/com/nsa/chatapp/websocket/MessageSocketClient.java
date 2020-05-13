@@ -7,7 +7,7 @@ package com.nsa.chatapp.websocket;
 public class MessageSocketClient {
 	public enum MessageType 
 	{
-		GET_MESSAGE, GET_MAIL, GET_FILE;
+		GET_MESSAGE, GET_MAIL, GET_FILE, GET_FRIEND_LIST, GET_LAST_50, GET_FRIEND;
 	}
 	
 	private MessageType messagetype;

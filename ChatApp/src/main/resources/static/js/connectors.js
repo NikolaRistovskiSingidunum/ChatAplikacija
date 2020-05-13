@@ -3,16 +3,16 @@
 //const sockethost = "ws://localhost:8887";
 //const springservice = "http://localhost:9090/";
 var me;
-//const sockethost = "ws://178.223.46.148:8887";
-//const springservice = "http://178.223.46.148:9090/";
+//const sockethost = "ws://77.46.230.62:8887";
+//const springservice = "http://77.46.230.62:9090/";
 
 
 const sockethost = "ws://localhost:8887";
 const springservice = "http://localhost:9090/";
+//
 
-
-//const sockethost = "ws://192.168.1.13:8887";
-//const springservice = "http://192.168.1.13:9090/";
+//const sockethost = "ws://192.168.1.17:8887";
+//const springservice = "http://192.168.1.17:9090/";
 //socket = new WebSocket('ws://localhost:8887');
 //
 //// Connection opened
@@ -91,14 +91,14 @@ function sendLoginCookie(msg)
 	ws.send(cookie);
 }
 
-function send()
-{
-	var msg = { "id":[1,2],"message":"neka poruka"};
-	msg = JSON.stringify(msg);
-	console.log(msg);
-	ws.send(msg);
-	
-}
+//function send()
+//{
+//	var msg = { "id":[1,2],"message":"neka poruka"};
+//	msg = JSON.stringify(msg);
+//	console.log(msg);
+//	ws.send(msg);
+//	
+//}
 
 function login()
 {

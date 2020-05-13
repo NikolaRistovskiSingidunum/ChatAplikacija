@@ -1,5 +1,10 @@
 
 
+var template_userdetails = '<div class="user-details" >\
+							<h2>Natasa</h2>\
+							<a href="#" onclick="logout()" class="btn btn-primary">Odjava</a>\
+							</div>';
+
 function whoAmI() {
 	console.log("opet JA i samo JA");
 
@@ -22,5 +27,10 @@ function whoAmI() {
 //dobij i stavi ih na ekran
 function populateUserInfo(me)
 {
-	let ja = $("#user-details").text("Ulogovani ste: " + me.fullname);
+	let ja = DomParser.parseFromString(template_userdetails, "text/html").body.childNodes[0];
+	
+    $(ja).find("h2").text(me.fullname.split(" ")[0]);
+    
+    $("body").append(ja);
+    
 }

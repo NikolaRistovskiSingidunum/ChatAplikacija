@@ -3,8 +3,10 @@ package com.nsa.chatapp.websocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.java_websocket.WebSocket;
@@ -50,6 +52,55 @@ public class WebSocketSessionInformation implements Comparable<WebSocketSessionI
 		this.sessionInformation = sessionInformation;
 	}
 
+	//ako su soketi konektovani onda je vreme da uzmes listu prijatelja
+	synchronized public static void sendGetFriendList(WebSocket websocket)
+	{
+		for(WebSocketSessionInformation w: allConnections)
+		{
+			if( w.websocket == websocket && w.isSessionOK() )
+			{
+				String jsonClientMessage;
+				try {
+					Map m = new HashMap<String, String>();
+					m.put("messagetype", MessageType.GET_FRIEND_LIST);
+					jsonClientMessage = new ObjectMapper().writeValueAsString(m );
+					w.websocket.send(jsonClientMessage);
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+	}
+	//Ako dodamo novogo prijatelja u mrezu - neka ga automaski pokupe
+	synchronized public static void sendGetFriend(ArrayList<Integer> list)
+	{
+	
+	}
+	
+	//posle rekonekta uzimamo zadnjih 50 poruku
+	synchronized public static void sendGetLast50(WebSocket websocket)
+	{
+	
+		for(WebSocketSessionInformation w: allConnections)
+		{
+			if( w.websocket == websocket && w.isSessionOK() )
+			{
+				String jsonClientMessage;
+				try {
+					Map m = new HashMap<String, String>();
+					m.put("messagetype", MessageType.GET_LAST_50);
+					jsonClientMessage = new ObjectMapper().writeValueAsString(m );
+					w.websocket.send(jsonClientMessage);
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+	}
 	synchronized public static void sendMessage(Integer userID, Integer messageChatID, MessageType messageType)
 	{
 		//removeBadSessions();

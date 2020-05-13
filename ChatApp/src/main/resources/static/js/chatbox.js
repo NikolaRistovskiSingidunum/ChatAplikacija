@@ -10,11 +10,24 @@ class ActiveChatboxes
         {
             this.active_chatboxes = [];
             this.width = 200;
+            
+            let thiz = this;
+            
+            // koliki je maksimux kutija koje ce biti poredjane horizontalno
+            this.max_number_of_chatboxes_inlined = Math.floor( (window.innerWidth - 200)/200.0 );
+            window.addEventListener("resize", function() {
+            thiz.max_number_of_chatboxes_inlined = Math.floor( (window.innerWidth - 200)/200.0 );
+                //thiz.deleteOverflow();
+                thiz.redraw();
+                thiz.deleteOverflow();
+                //console.log(screen.width);
+                //console.log(window.innerWidth);
+            });
         }
         activate(box)
         {
         	let bInGoodPosition = false
-            for(let i=0; i<this.active_chatboxes.length &&  i<6; i++)
+            for(let i=0; i<this.active_chatboxes.length &&  i<this.max_number_of_chatboxes_inlined; i++)
             	{
             	if(this.active_chatboxes[i] == box)
             		bInGoodPosition = true;
@@ -38,7 +51,7 @@ class ActiveChatboxes
         }
         redraw()
         {
-                for(let i=0; i<this.active_chatboxes.length &&  i<6; i++)
+                for(let i=0; i<this.active_chatboxes.length &&  i<this.max_number_of_chatboxes_inlined; i++)
             	{
                 	let box = this.active_chatboxes[i];
                     $(box).css("position","fixed");
@@ -62,7 +75,7 @@ class ActiveChatboxes
         deleteOverflow()
         {
            let l = this.active_chatboxes.length;
-            for(let i=6; i<l;i++ )
+            for(let i=this.max_number_of_chatboxes_inlined; i<l;i++ )
                 {
                     $(this.active_chatboxes[i]).css("visibility","hidden");
                 	$(this.active_chatboxes[i]).find(".msg-icon-minimize").css("visibility","hidden");
@@ -70,10 +83,10 @@ class ActiveChatboxes
                 }
                 
                 
-            if(l<6)
+            if(l<this.max_number_of_chatboxes_inlined)
                 return;
             else
-                this.active_chatboxes.splice(6,l);
+                this.active_chatboxes.splice(this.max_number_of_chatboxes_inlined,l);
                 
         }
         remove(box)
@@ -92,7 +105,7 @@ class ActiveChatboxes
     }
 
 var activeChatBoxes = new ActiveChatboxes();
-var template_chat_box = '<div class="msg-whole-chat-box" draggable="false">\
+var template_chat_box = '<div class="msg-whole-chat-box chat-box-width" draggable="false">\
 	<i class="fas fa-times msg-icon-delete" onclick="activeChatBoxes.remove(this.parentNode)" title="skloni" ></i>\
 	<i class="far fa-minus-square msg-icon-minimize" onclick="minimizeChatBox(this.parentNode)" title="smanji"></i>\
 			<div class="msg-box">\
@@ -134,6 +147,7 @@ function test_draw10()
 
 
 
+
 function onGetFirendList(data)
 {
 	data =  JSON.parse(data);
@@ -165,6 +179,17 @@ function onGetFirendList(data)
     
 	
 }
+
+function isMobile()
+{
+if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
+{
+	 // some code..
+	return true;
+}
+	return false;
+}
+
 function createFriendSelector(user)
 {
     	let b = chatboxes.has(user.username);
@@ -189,13 +214,16 @@ function createFriendSelector(user)
     
     $(newFriendSelector).click(function() { console.log(newChatBox.user); activeChatBoxes.activate(newChatBox);  })
     
-    
+  
     
     
     let ch = $(".friend-list");
     ch.append($(newFriendSelector));
     
-    
+//    if(isMobile()==true)
+//	{
+//	ch.css("visibility","hidden");
+//	}
     
     
 }
@@ -236,6 +264,10 @@ function toggleVisibility(el, p)
         target.css("display","block");
         //$(el).text("sakrij");
         $(p).find(".msg-icon-minimize").css("visibility","visible");
+//        if(isMobile() == true)
+//        	{
+//        	$(p).find(".msg-icon-minimize").css("visibility","hidden");
+//        	}
     	}
     else
     	{
@@ -288,6 +320,16 @@ function createChatBox_new_new(user)
 
     //postavi file picker
     
+    let icon_more = $(newChatBox).find(".msg-icon-more");
+    icon_more.get(0).onclick = function () { 
+    	let lastMessageID = findLastMessageID(newChatBox);
+    	console.log(lastMessageID);
+    	if(lastMessageID>0)
+    		{
+    		getMessagesLastLess(newChatBox.user.id, lastMessageID);
+    		}
+    	};
+    
     let icon_attach = $(newChatBox).find(".msg-icon-attach");
     let input_attach = $(newChatBox).find(".manual-attachment");  
     icon_attach.get(0).onclick = function(){ input_attach.get(0).click(); };
@@ -338,8 +380,22 @@ function createChatBox_new_new(user)
     	}
     });
     
-    
+    //if(isMobile()==false)
     $("body").append($(newChatBox));
+    
+    
+//    if(isMobile()==true)
+//    	{
+//    	$(newChatBox).css("visibility","visible");
+//    	$(newChatBox).css("width","100%");
+//    	$(newChatBox).find(".msg-dugme").css("width","100%");
+//    	$(newChatBox).find(".msg-icon-delete").css("visibility","hidden");
+//    	$(newChatBox).find(".msg-icon-minimize").css("visibility","hidden");
+//    	$(newChatBox).find(".msg-dugme").css("height","100px");
+//    	$(newChatBox).find(".msg-read").css("height","400px");
+//        let container = $(".container");
+//        container.append($(newChatBox));
+//    	}
     
     onChatBoxCreated(newChatBox);
     return newChatBox;

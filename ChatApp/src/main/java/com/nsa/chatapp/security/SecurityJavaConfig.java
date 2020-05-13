@@ -49,8 +49,11 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
         .antMatchers("/admin/find/*").hasRole("LOGGEDUSER")
         .antMatchers("/index.html").hasRole("LOGGEDUSER")
-        .antMatchers("/**").hasRole("LOGGEDUSER")
-        .and().anonymous().authorities("ROLE_SOMEBODY")
+//        .antMatchers("/**").hasRole("LOGGEDUSER")
+        .antMatchers("/css/*").hasRole("LOGGEDUSER")
+        .antMatchers("/js/*").hasRole("LOGGEDUSER")
+        .antMatchers("/userfiles/*").hasRole("ADMIN")
+//        .and().anonymous().authorities("ROLE_SOMEBODY")
         
         //.and().authorizeRequests().antMatchers("/comment").hasIpAddress("127.0.0.1")
 //        .and().authorizeRequests().antMatchers("/comment").hasRole("SOMEBODY")

@@ -1,6 +1,7 @@
 package com.nsa.chatapp;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.ApplicationEvent;
@@ -14,6 +15,7 @@ import com.nsa.chatapp.websocket.SocketConnector;
 @SpringBootApplication(exclude={SecurityAutoConfiguration.class})
 //@EnableJpaRepositories(basePackages={"com.nsa.demo"})
 @ComponentScan("com.nsa.chatapp")
+//@EnableAutoConfiguration
 public class ChatApp implements ApplicationListener<ContextRefreshedEvent> {
 
 	SocketConnector socketConnector;
@@ -31,7 +33,7 @@ public class ChatApp implements ApplicationListener<ContextRefreshedEvent> {
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		// TODO Auto-generated method stub
 		System.out.println(event.toString());
-		System.out.println("Ulazna tacka u aplikaciju");
+		System.out.println("Ulazna tacka u aplikaciju AAA AAA");
 		
 		if(socketConnector == null)
 		{

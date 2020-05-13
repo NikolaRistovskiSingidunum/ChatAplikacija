@@ -87,8 +87,15 @@ public class ChatServer extends WebSocketServer {
 				System.out.println("PLEASE LOGIN");
 				conn.close();
 			}
+//			else if(state ==  WebSocketSessionInformation.State.ALLREADY_EXISTS)
+//			{
+//				System.out.println("rekonekt");
+//				onReconnectReady(conn);
+//			}
 			else
 			{
+				
+				onConnectionReady(conn);
 				System.out.println("Uspesno logovanje");
 			}
 		}
@@ -98,6 +105,7 @@ public class ChatServer extends WebSocketServer {
 			System.out.println(e.getMessage());
 			
 		}
+		
 		
 		
 //		String sessionID = "";
@@ -191,6 +199,18 @@ public class ChatServer extends WebSocketServer {
 //		}
 	}
 
+	//kada je soket poslao odgovarajuci id
+	public void onConnectionReady(WebSocket conn)
+	{
+		WebSocketSessionInformation.sendGetFriendList(conn);
+	}
+	
+	//kada se rekonektujemo - nije testirano i nece biti skoro 
+	public void onReconnectReady(WebSocket conn)
+	{
+		//WebSocketSessionInformation.sendGetLast50(conn);
+	}
+	
 	@Override
 	public void onMessage(WebSocket conn, ByteBuffer message) {
 		broadcast(message.array());
